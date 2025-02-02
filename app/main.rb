@@ -52,41 +52,48 @@ def handle_input args
   end
 end
 
-def tick args
-  if args.tick_count == 0
-    init args
-  end
-
-  if args.state.knights.size < 10
-    spawn_knight args
-  end
-
-  handle_input args
-
+def move_knights args
   args.state.knights.map do |k|
     k.x += k.v
-    puts args.state.barriers
-    puts args.state.barriers.size
     if k.x + k.w >= 1280 or k.x <= 0 or args.state.barriers.any_intersect_rect?(k)
       k.v = -k.v
       k.y -= (k.h + 10)
       k.flip_horizontally = !k.flip_horizontally
     end
   end
+end
 
+def move_fireballs
   args.state.fireballs.map do |f|
     f.y += f.v
     if f.y > 720
       f.deleted=true
     end
   end
+end
 
+def tick args
+  if args.tick_count == 0
+    init args
+  end
+
+  # Continuously spawn new knights
+  if args.state.knights.size < 10
+    spawn_knight args
+  end
+
+  handle_input args
+  move_knights args
+  move_fireballs args
+
+  # Did any Knights get hit?
   Geometry.each_intersect_rect(args.state.fireballs, args.state.knights) do |fireball, knight|
     knight.damaged=true
     knight.path = 'sprites/square/blue.png'
     fireball.deleted=true
   end
 
+  # Cleanup after any hits
   args.state.fireballs = args.state.fireballs.select{|f| f.deleted == false}
   args.state.barriers += args.state.knights.select{|k| k.damaged == true}
   args.state.knights = args.state.knights.select{|k| k.damaged == false}
