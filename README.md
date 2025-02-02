@@ -2,14 +2,16 @@
 
 Protect your cave from the invading knights!
 
-             
- Kn Kn Kn Kn
-  Kn Kn Kn   
-
-
-     Dr      
--------------
-Score   Lives
+```
+|             |
+| Kn Kn Kn Kn |
+|  Kn Kn Kn   |
+|             |
+|             |
+|     Dr      |
+|-------------|
+|Score   Lives|
+```
 
 ## Game Assets
 * Dragon
