@@ -63,7 +63,7 @@ def move_knights args
   end
 end
 
-def move_fireballs
+def move_fireballs args
   args.state.fireballs.map do |f|
     f.y += f.v
     if f.y > 720

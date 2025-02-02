@@ -1,7 +1,7 @@
 # Remove the pound sign and leading space for the properties below before publishing your game.
 devid=kehvarl
 devtitle=Kehvarl
-gameid=knight-invation
+gameid=knight-invasion
 gametitle=Knight Invasion
 version=0.1
 icon=metadata/icon.png
