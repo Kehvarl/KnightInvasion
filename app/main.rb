@@ -1,14 +1,31 @@
 def init args
   args.state.dragon = {v:5, x:620, y:0, w:40, h:80, path:'sprites/square/black.png'}.sprite!
   args.state.knights = []
-  args.state.running = false
+  args.state.fireballs = []
 end
 
 def spawn_knight args
   k = {v:2, x:0, y:680, w:90, h:40}
   if not args.state.knights.any_intersect_rect?(k)
-    args.state.knights << {v:2, x:0, y:680, w:60, h:40, flip_horizontally: false, path:'sprites/square/red.png'}.sprite!
+    args.state.knights << {damaged:false,
+                           v:2, x:0, y:680, w:60, h:40,
+                           flip_horizontally: false,
+                           path:'sprites/square/red.png'}.sprite!
   end
+end
+
+def spawn_fireball args
+  f = {deleted:false,
+       x:args.state.dragon.x,
+       y:args.state.dragon.y + args.state.dragon.h,
+       w:40, h:40, v:2,
+       path:'sprites/misc/explosion-1.png'}.sprite!
+
+  if args.state.fireballs.size > 2 or args.state.fireballs.any_intersect_rect?(f)
+    return
+  end
+  args.state.fireballs << f
+
 end
 
 def tick args
@@ -38,25 +55,34 @@ def tick args
 
   if args.inputs.keyboard.space
     #Breathe fire
-    args.state.running = true
+    spawn_fireball args
   end
 
-  if not args.state.running
-    return
-  end
-
-  knights = args.state.knights.map do |k|
+  args.state.knights.map do |k|
     k.x += k.v
     if k.x + k.w >= 1280 or k.x <= 0
       k.v = -k.v
       k.y -= (k.h + 10)
       k.flip_horizontally = !k.flip_horizontally
     end
-
   end
 
+  args.state.fireballs.map do |f|
+    f.y += f.v
+    if f.y > 720
+      f.deleted=true
+    end
+    hits = args.state.knights.select{|k| k.intersect_rect?(f)}
+    hits.each do |h|
+      h.damaged=true
+      f.deleted=true
+    end
+  end
+  args.state.fireballs = args.state.fireballs.select{|f| f.deleted == false}
+  args.state.knights = args.state.knights.select{|k| k.damaged == false}
   # Render
   args.outputs.primitives << {x:0, y:0, w:1280, h:720, r:0, g:96, b:32}.solid!
   args.outputs.primitives << args.state.dragon
   args.outputs.primitives << args.state.knights
+  args.outputs.primitives << args.state.fireballs
 end
