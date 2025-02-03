@@ -26,7 +26,12 @@ def spawn_fireball args
     return
   end
   args.state.fireballs << f
+end
 
+def spawn_barrier args, knight
+  args.state.barriers << {hp: 5,
+                          x:knight.x, y:knight.y, w:40, h:40,
+                          path:'sprites/square/blue.png'}.sprite!
 end
 
 def handle_input args
@@ -89,14 +94,21 @@ def tick args
   # Did any Knights get hit?
   Geometry.each_intersect_rect(args.state.fireballs, args.state.knights) do |fireball, knight|
     knight.damaged=true
-    knight.path = 'sprites/square/blue.png'
+    spawn_barrier args, knight
+    fireball.deleted=true
+  end
+
+    # Did any Knights get hit?
+  Geometry.each_intersect_rect(args.state.fireballs, args.state.barriers) do |fireball, barrier|
+    barrier.hp -=1
     fireball.deleted=true
   end
 
   # Cleanup after any hits
   args.state.fireballs = args.state.fireballs.select{|f| f.deleted == false}
-  args.state.barriers += args.state.knights.select{|k| k.damaged == true}
   args.state.knights = args.state.knights.select{|k| k.damaged == false}
+  args.state.barriers = args.state.barriers.select{|b| b.hp > 0}
+
 
   # Render
   args.outputs.primitives << {x:0, y:0, w:1280, h:720, r:0, g:96, b:32}.solid!
