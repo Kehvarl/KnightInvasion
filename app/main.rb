@@ -8,7 +8,7 @@ end
 def spawn_knight args
   k = {v:2, x:0, y:680, w:90, h:40}
   if not args.state.knights.any_intersect_rect?(k)
-    args.state.knights << {damaged:false,
+    args.state.knights << {remove:false,
                            v:2, x:0, y:680, w:60, h:40,
                            flip_horizontally: false,
                            path:'sprites/square/red.png'}.sprite!
@@ -16,7 +16,7 @@ def spawn_knight args
 end
 
 def spawn_fireball args
-  f = {deleted:false,
+  f = {remove:false,
        x:args.state.dragon.x,
        y:args.state.dragon.y + args.state.dragon.h,
        w:40, h:40, v:2,
@@ -29,7 +29,7 @@ def spawn_fireball args
 end
 
 def spawn_barrier args, knight
-  args.state.barriers << {hp: 5,
+  args.state.barriers << {hp: 3,
                           x:knight.x, y:knight.y, w:40, h:40,
                           path:'sprites/square/blue.png'}.sprite!
 end
@@ -72,7 +72,7 @@ def move_fireballs args
   args.state.fireballs.map do |f|
     f.y += f.v
     if f.y > 720
-      f.deleted=true
+      f.remove=true
     end
   end
 end
@@ -93,20 +93,20 @@ def tick args
 
   # Did any Knights get hit?
   Geometry.each_intersect_rect(args.state.fireballs, args.state.knights) do |fireball, knight|
-    knight.damaged=true
+    knight.remove=true
     spawn_barrier args, knight
-    fireball.deleted=true
+    fireball.remove=true
   end
 
     # Did any Knights get hit?
   Geometry.each_intersect_rect(args.state.fireballs, args.state.barriers) do |fireball, barrier|
     barrier.hp -=1
-    fireball.deleted=true
+    fireball.remove=true
   end
 
   # Cleanup after any hits
-  args.state.fireballs = args.state.fireballs.select{|f| f.deleted == false}
-  args.state.knights = args.state.knights.select{|k| k.damaged == false}
+  args.state.fireballs = args.state.fireballs.select{|f| f.remove == false}
+  args.state.knights = args.state.knights.select{|k| k.remove == false}
   args.state.barriers = args.state.barriers.select{|b| b.hp > 0}
 
 
