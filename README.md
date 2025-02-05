@@ -27,3 +27,9 @@ Protect your cave from the invading knights!
   * Cave entrance
 * Obstacles
   * Rocks and trees that change knight movement
+
+## Gameplay
+* Very Centipede
+* knights march towards cave
+* when killed knights become <somthing>
+* Barriers force knights to change direction
