@@ -1,17 +1,28 @@
 def init args
   args.state.dragon = {v:5, x:620, y:0, w:40, h:80, path:'sprites/square/black.png'}.sprite!
   args.state.knights = []
+  args.state.princesses = []
   args.state.fireballs = []
   args.state.barriers = []
 end
 
 def spawn_knight args
-  k = {v:2, x:0, y:680, w:90, h:40}
+  k = {v:2, x:0, y:630, w:90, h:40}
   if not args.state.knights.any_intersect_rect?(k)
     args.state.knights << {remove:false,
-                           v:2, x:0, y:680, w:60, h:40,
+                           v:2, x:0, y:630, w:60, h:40,
                            flip_horizontally: false,
                            path:'sprites/square/red.png'}.sprite!
+  end
+end
+
+def spawn_princess args
+  k = {v:2, x:0, y:680, w:20, h:30}
+  if not args.state.knights.any_intersect_rect?(k)
+    args.state.princesses << {remove:false,
+                           v:2, x:0, y:680, w:60, h:40,
+                           flip_horizontally: false,
+                           path:'sprites/square/violet.png'}.sprite!
   end
 end
 
@@ -68,6 +79,15 @@ def move_knights args
   end
 end
 
+def move_princesses args
+    args.state.princesses.map do |p|
+    p.x += p.v
+    if p.x > 1280
+      p.remove = true
+    end
+  end
+end
+
 def move_fireballs args
   args.state.fireballs.map do |f|
     f.y += f.v
@@ -82,6 +102,10 @@ def tick args
     init args
   end
 
+  if rand(10000) < 10
+    spawn_princess args
+  end
+
   # Continuously spawn new knights
   if args.state.knights.size < 10
     spawn_knight args
@@ -89,6 +113,7 @@ def tick args
 
   handle_input args
   move_knights args
+  move_princesses args
   move_fireballs args
 
   # Did any Knights get hit?
@@ -98,7 +123,13 @@ def tick args
     fireball.remove=true
   end
 
-    # Did any Knights get hit?
+  # Did any princesses get hit?
+  Geometry.each_intersect_rect(args.state.fireballs, args.state.princesses) do |fireball, princess|
+    princess.remove=true
+    fireball.remove=true
+  end
+
+    # Did any Barriers get hit?
   Geometry.each_intersect_rect(args.state.fireballs, args.state.barriers) do |fireball, barrier|
     barrier.hp -=1
     fireball.remove=true
@@ -107,13 +138,17 @@ def tick args
   # Cleanup after any hits
   args.state.fireballs = args.state.fireballs.select{|f| f.remove == false}
   args.state.knights = args.state.knights.select{|k| k.remove == false}
+  args.state.princesses = args.state.princesses.select{|p| p.remove == false}
+
   args.state.barriers = args.state.barriers.select{|b| b.hp > 0}
+
 
 
   # Render
   args.outputs.primitives << {x:0, y:0, w:1280, h:720, r:0, g:96, b:32}.solid!
   args.outputs.primitives << args.state.dragon
   args.outputs.primitives << args.state.knights
+  args.outputs.primitives << args.state.princesses
   args.outputs.primitives << args.state.barriers
   args.outputs.primitives << args.state.fireballs
 end
