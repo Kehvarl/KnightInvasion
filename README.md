@@ -33,3 +33,5 @@ Protect your cave from the invading knights!
 * knights march towards cave
 * when killed knights become <somthing>
 * Barriers force knights to change direction
+* Let's make Princesses ride by at the top of the screen for bonus points
+* And something come straight down scattering barriiers
