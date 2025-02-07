@@ -1,7 +1,9 @@
 def init args
   args.state.dragon = {v:5, x:620, y:0, w:40, h:80, path:'sprites/square/black.png'}.sprite!
   args.state.knights = []
+  args.state.knights_to_spawn = 10
   args.state.princesses = []
+  args.state.princess_countdown = 600
   args.state.fireballs = []
   args.state.barriers = []
 end
@@ -13,7 +15,9 @@ def spawn_knight args
                            v:2, x:0, y:630, w:60, h:40,
                            flip_horizontally: false,
                            path:'sprites/square/red.png'}.sprite!
+    return true
   end
+  return false
 end
 
 def spawn_princess args
@@ -102,13 +106,18 @@ def tick args
     init args
   end
 
-  if rand(10000) < 10
+  args.state.princess_countdown -= 1
+  if args.state.princess_countdown <= 0 and rand(1000) < 10
     spawn_princess args
+    args.state.princess_countdown = 300 + rand(600)
   end
 
+
   # Continuously spawn new knights
-  if args.state.knights.size < 10
-    spawn_knight args
+  if args.state.knights_to_spawn > 0
+    if spawn_knight args
+      args.state.knights_to_spawn -= 1
+    end
   end
 
   handle_input args
