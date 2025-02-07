@@ -70,6 +70,10 @@ def handle_input args
     #Breathe fire
     spawn_fireball args
   end
+
+  if args.inputs.keyboard.key_up.s and args.state.knights_to_spawn <= 0
+    args.state.knights_to_spawn = rand(5) + 5
+  end
 end
 
 def move_knights args
