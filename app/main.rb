@@ -105,31 +105,8 @@ def move_fireballs args
   end
 end
 
-def tick args
-  if args.tick_count == 0
-    init args
-  end
-
-  args.state.princess_countdown -= 1
-  if args.state.princess_countdown <= 0 and rand(1000) < 10
-    spawn_princess args
-    args.state.princess_countdown = 300 + rand(600)
-  end
-
-
-  # Continuously spawn new knights
-  if args.state.knights_to_spawn > 0
-    if spawn_knight args
-      args.state.knights_to_spawn -= 1
-    end
-  end
-
-  handle_input args
-  move_knights args
-  move_princesses args
-  move_fireballs args
-
-  # Did any Knights get hit?
+def handle_hits args
+    # Did any Knights get hit?
   Geometry.each_intersect_rect(args.state.fireballs, args.state.knights) do |fireball, knight|
     knight.remove=true
     spawn_barrier args, knight
@@ -154,14 +131,42 @@ def tick args
   args.state.princesses = args.state.princesses.select{|p| p.remove == false}
 
   args.state.barriers = args.state.barriers.select{|b| b.hp > 0}
+end
 
-
-
-  # Render
+def render args
+    # Render
   args.outputs.primitives << {x:0, y:0, w:1280, h:720, r:0, g:96, b:32}.solid!
   args.outputs.primitives << args.state.dragon
   args.outputs.primitives << args.state.knights
   args.outputs.primitives << args.state.princesses
   args.outputs.primitives << args.state.barriers
   args.outputs.primitives << args.state.fireballs
+end
+
+def tick args
+  if args.tick_count == 0
+    init args
+  end
+
+  args.state.princess_countdown -= 1
+  if args.state.princess_countdown <= 0 and rand(1000) < 10
+    spawn_princess args
+    args.state.princess_countdown = 300 + rand(600)
+  end
+
+
+  # Continuously spawn new knights
+  if args.state.knights_to_spawn > 0
+    if spawn_knight args
+      args.state.knights_to_spawn -= 1
+    end
+  end
+
+  handle_input args
+  move_knights args
+  move_princesses args
+  move_fireballs args
+  handle_hits args
+
+  render args
 end
