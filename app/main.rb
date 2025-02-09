@@ -9,10 +9,10 @@ def init args
 end
 
 def spawn_knight args
-  k = {v:2, x:0, y:630, w:90, h:40}
+  k = {x:0, y:630, w:90, h:40}
   if not args.state.knights.any_intersect_rect?(k)
     args.state.knights << {remove:false,
-                           v:2, x:0, y:630, w:60, h:40,
+                           v:3, x:0, y:630, w:60, h:40,
                            flip_horizontally: false,
                            path:'sprites/square/red.png'}.sprite!
     return true
@@ -21,10 +21,10 @@ def spawn_knight args
 end
 
 def spawn_princess args
-  k = {v:2, x:0, y:680, w:20, h:30}
-  if not args.state.knights.any_intersect_rect?(k)
+  p = {x:0, y:680, w:20, h:30}
+  if not args.state.knights.any_intersect_rect?(p)
     args.state.princesses << {remove:false,
-                           v:2, x:0, y:680, w:60, h:40,
+                           v:5, x:0, y:680, w:60, h:40,
                            flip_horizontally: false,
                            path:'sprites/square/violet.png'}.sprite!
   end
@@ -34,7 +34,7 @@ def spawn_fireball args
   f = {remove:false,
        x:args.state.dragon.x,
        y:args.state.dragon.y + args.state.dragon.h,
-       w:40, h:40, v:2,
+       w:40, h:40, v:6,
        path:'sprites/misc/explosion-1.png'}.sprite!
 
   if args.state.fireballs.size > 2 or args.state.fireballs.any_intersect_rect?(f)
