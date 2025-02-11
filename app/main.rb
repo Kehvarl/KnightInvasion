@@ -11,7 +11,7 @@ end
 def spawn_knight args
   k = {x:0, y:40, w:60, h:40}
   if not args.state.knights.any_intersect_rect?(k)
-    args.state.knights << {remove:false,
+    args.state.knights << {remove:false, arrow:false,
                            v:3, x:0, y:40, w:30, h:40,
                            flip_horizontally: false,
                            path:'sprites/square/red.png'}.sprite!
@@ -21,10 +21,11 @@ def spawn_knight args
 end
 
 def spawn_princess args
-  p = {x:0, y:5, w:20, h:30}
+  py =  rand(400)
+  p = {x:0, y:py, w:20, h:30}
   if not args.state.knights.any_intersect_rect?(p)
     args.state.princesses << {remove:false,
-                           v:5, x:0, y:5, w:20, h:30,
+                           v:5, x:0, y:py, w:20, h:30,
                            flip_horizontally: false,
                            path:'sprites/square/violet.png'}.sprite!
   end
@@ -44,7 +45,7 @@ def spawn_fireball args
 end
 
 def spawn_barrier args, knight
-  args.state.barriers << {hp: 3,
+  args.state.barriers << {hp: 3, arrow: false,
                           x:knight.x, y:knight.y, w:30, h:40,
                           path:'sprites/square/blue.png'}.sprite!
 end
@@ -81,21 +82,39 @@ end
 
 def move_knights args
   args.state.knights.map do |k|
-    k.x += k.v
-    if k.x + k.w >= 1280 or k.x <= 0 or args.state.barriers.any_intersect_rect?(k)
-      k.v = -k.v
-      k.y += (k.h + 10)
-      k.flip_horizontally = !k.flip_horizontally
+    if k.arrow
+      k.y += k.v
+      if k.y + k.h >= 700
+        k.arrow = false
+      end
+    else
+      k.x += k.v
+      if k.x + k.w >= 1280 or k.x <= 0 or args.state.barriers.any_intersect_rect?(k)
+        Geometry.each_intersect_rect(args.state.barriers, args.state.knights) do |barrier, knight|
+          if barrier.arrow
+            knight.arrow = true
+            return
+          end
+        end
+        k.v = -k.v
+        k.y += (k.h + 10)
+        k.flip_horizontally = !k.flip_horizontally
+      end
     end
   end
 end
 
 def move_princesses args
-    args.state.princesses.map do |p|
+  args.state.princesses.map do |p|
     p.x += p.v
     if p.x > 1280
       p.remove = true
     end
+  end
+  # Did a princess touch a statue?
+  Geometry.each_intersect_rect(args.state.barriers, args.state.princesses) do |barrier, princess|
+    barrier.arrow=true
+    barrier.path='sprites/square/green.png'
   end
 end
 
