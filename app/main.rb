@@ -12,6 +12,7 @@ def spawn_knight args
   k = {x:0, y:40, w:60, h:40}
   if not args.state.knights.any_intersect_rect?(k)
     args.state.knights << {remove:false, arrow:false,
+                           :direction => :up,
                            v:3, x:0, y:40, w:30, h:40,
                            flip_horizontally: false,
                            path:'sprites/square/red.png'}.sprite!
@@ -97,7 +98,16 @@ def move_knights args
           end
         end
         k.v = -k.v
-        k.y += (k.h + 10)
+        if k.direction == :up
+          k.y += (k.h + 10)
+        else
+          k.y -= (k.h + 10)
+        end
+        if k.y <= 0
+          k.direction = :up
+        elsif k.y >= 630
+          k.direction = :down
+        end
         k.flip_horizontally = !k.flip_horizontally
       end
     end
@@ -179,7 +189,7 @@ def tick args
   end
 
 
-  # Continuously spawn new knights
+  # Spawn Knights when required
   if args.state.knights_to_spawn > 0
     if spawn_knight args
       args.state.knights_to_spawn -= 1
