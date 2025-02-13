@@ -2,8 +2,9 @@ def init args
   args.state.dragon = {shot_delay:0, v:5, x:620, y:660, w:30, h:60, path:'sprites/square/black.png'}.sprite!
   args.state.knights = []
   args.state.knights_to_spawn = 10
+  args.state.knights_countdown = 0
   args.state.princesses = []
-  args.state.princess_countdown = 600
+  args.state.princess_countdown = rand(300) + 300
   args.state.fireballs = []
   args.state.barriers = []
 end
@@ -74,10 +75,6 @@ def handle_input args
       spawn_fireball args
       args.state.dragon.shot_delay = 15
     end
-  end
-
-  if args.inputs.keyboard.key_up.s and args.state.knights_to_spawn <= 0
-    args.state.knights_to_spawn = rand(5) + 5
   end
 end
 
@@ -193,7 +190,12 @@ def tick args
   if args.state.knights_to_spawn > 0
     if spawn_knight args
       args.state.knights_to_spawn -= 1
+      args.state.knights_countdown = rand(500) + 500
     end
+  end
+
+  if args.state.knights_countdown <= 0 and args.state.knights_to_spawn <= 0
+    args.state.knights_to_spawn = rand(5) + 5
   end
 
   handle_input args
