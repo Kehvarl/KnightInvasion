@@ -5,6 +5,8 @@ def init args
   args.state.knights_countdown = 0
   args.state.princesses = []
   args.state.princess_countdown = rand(300) + 300
+  args.state.sheep = []
+  args.state.sheep_countdown = rand(200) + 200
   args.state.fireballs = []
   args.state.barriers = []
 end
@@ -31,6 +33,15 @@ def spawn_princess args
                            flip_horizontally: false,
                            path:'sprites/square/violet.png'}.sprite!
   end
+end
+
+def spawn_sheep args
+  sx = rand(1250)
+  s = {x:sx, y:0, w:20, h:30}
+  args.state.sheep << {remove:false,
+                          v:3, x:sx, y:0, w:20, h:30,
+                          flip_horizontally: false,
+                          path:'sprites/square/gray.png'}.sprite!
 end
 
 def spawn_fireball args
@@ -125,6 +136,21 @@ def move_princesses args
   end
 end
 
+def move_sheep args
+  args.state.sheep.map do |s|
+    s.y += s.v
+    if s.y > 640
+      s.remove = true
+    end
+    if not s.remove
+        sb = {x:s.x-15, y:s.y-15, w:s.w+30, h:s.h+30}
+        if not args.state.barriers.any_intersect_rect?(sb)
+          spawn_barrier args, s
+        end
+    end
+  end
+end
+
 def move_fireballs args
   args.state.fireballs.map do |f|
     f.y -= f.v
@@ -154,10 +180,18 @@ def handle_hits args
     fireball.remove=true
   end
 
+      # Did any Barriers get hit?
+  Geometry.each_intersect_rect(args.state.fireballs, args.state.sheep) do |fireball, sheep|
+    sheep.remove=true
+    fireball.remove=true
+  end
+
   # Cleanup after any hits
   args.state.fireballs = args.state.fireballs.select{|f| f.remove == false}
   args.state.knights = args.state.knights.select{|k| k.remove == false}
   args.state.princesses = args.state.princesses.select{|p| p.remove == false}
+  args.state.sheep = args.state.sheep.select{|s| s.remove == false}
+
 
   args.state.barriers = args.state.barriers.select{|b| b.hp > 0}
 end
@@ -168,6 +202,7 @@ def render args
   args.outputs.primitives << args.state.dragon
   args.outputs.primitives << args.state.knights
   args.outputs.primitives << args.state.princesses
+  args.outputs.primitives << args.state.sheep
   args.outputs.primitives << args.state.barriers
   args.outputs.primitives << args.state.fireballs
 end
@@ -183,6 +218,14 @@ def tick args
   if args.state.princess_countdown <= 0 and rand(1000) < 10
     spawn_princess args
     args.state.princess_countdown = 300 + rand(600)
+  end
+
+  if args.state.sheep.size == 0
+    args.state.sheep_countdown -= 1
+    if args.state.sheep_countdown <= 0
+      spawn_sheep args
+      args.state.sheep_countdown = rand(500) + 300
+    end
   end
 
 
@@ -201,6 +244,7 @@ def tick args
   handle_input args
   move_knights args
   move_princesses args
+  move_sheep args
   move_fireballs args
   handle_hits args
 
