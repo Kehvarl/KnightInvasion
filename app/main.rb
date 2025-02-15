@@ -1,4 +1,5 @@
 def init args
+  args.state.score = 0
   args.state.dragon = {shot_delay:0, v:5, x:620, y:660, w:30, h:60, path:'sprites/square/black.png'}.sprite!
   args.state.knights = []
   args.state.knights_to_spawn = 10
@@ -15,7 +16,7 @@ def spawn_knight args
   k = {x:0, y:40, w:60, h:40}
   if not args.state.knights.any_intersect_rect?(k)
     args.state.knights << {remove:false, arrow:false,
-                           :direction => :up,
+                           :direction => :up, score:10,
                            v:3, x:0, y:40, w:30, h:40,
                            flip_horizontally: false,
                            path:'sprites/square/red.png'}.sprite!
@@ -28,7 +29,7 @@ def spawn_princess args
   py =  rand(400)
   p = {x:0, y:py, w:20, h:30}
   if not args.state.knights.any_intersect_rect?(p)
-    args.state.princesses << {remove:false,
+    args.state.princesses << {remove:false, score:20,
                            v:5, x:0, y:py, w:20, h:30,
                            flip_horizontally: false,
                            path:'sprites/square/violet.png'}.sprite!
@@ -38,7 +39,7 @@ end
 def spawn_sheep args
   sx = rand(1250)
   s = {x:sx, y:0, w:20, h:30}
-  args.state.sheep << {remove:false,
+  args.state.sheep << {remove:false, score:30,
                           v:3, x:sx, y:0, w:20, h:30,
                           flip_horizontally: false,
                           path:'sprites/square/gray.png'}.sprite!
@@ -58,7 +59,7 @@ def spawn_fireball args
 end
 
 def spawn_barrier args, knight
-  args.state.barriers << {hp: 3, arrow: false,
+  args.state.barriers << {hp: 3, arrow: false, score:3,
                           x:knight.x, y:knight.y, w:30, h:40,
                           path:'sprites/square/blue.png'}.sprite!
 end
@@ -142,7 +143,7 @@ def move_sheep args
     if s.y > 640
       s.remove = true
     end
-    if not s.remove
+    if not s.remove and s.y <=600
         sb = {x:s.x-15, y:s.y-15, w:s.w+30, h:s.h+30}
         if not args.state.barriers.any_intersect_rect?(sb)
           spawn_barrier args, s
@@ -166,24 +167,28 @@ def handle_hits args
     knight.remove=true
     spawn_barrier args, knight
     fireball.remove=true
+    args.state.score += knight.score
   end
 
   # Did any princesses get hit?
   Geometry.each_intersect_rect(args.state.fireballs, args.state.princesses) do |fireball, princess|
     princess.remove=true
     fireball.remove=true
+    args.state.score += princess.score
   end
 
     # Did any Barriers get hit?
   Geometry.each_intersect_rect(args.state.fireballs, args.state.barriers) do |fireball, barrier|
     barrier.hp -=1
     fireball.remove=true
+    args.state.score += barrier.score
   end
 
       # Did any Barriers get hit?
   Geometry.each_intersect_rect(args.state.fireballs, args.state.sheep) do |fireball, sheep|
     sheep.remove=true
     fireball.remove=true
+    args.state.score += sheep.score
   end
 
   # Cleanup after any hits
@@ -205,6 +210,7 @@ def render args
   args.outputs.primitives << args.state.sheep
   args.outputs.primitives << args.state.barriers
   args.outputs.primitives << args.state.fireballs
+  args.outputs.primitives << {x:0, y:700, text: args.state.score.to_s}.label!
 end
 
 def tick args
