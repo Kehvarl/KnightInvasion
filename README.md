@@ -2,36 +2,12 @@
 
 Protect your cave from the invading knights!
 
-```
-|             |
-| Kn Kn Kn Kn |
-|  Kn Kn Kn   |
-|             |
-|             |
-|     Dr      |
-|-------------|
-|Score   Lives|
-```
+Knights march towards the cave.  If they reach the cave they take treasure and carry it away.
 
-## Game Assets
-* Dragon
-  * Idle/Hover Animation
-  * Fly Left/Right Animation
-  * Fly Forward Animation
-  * Fly Backward Animation
-* Knights
-  * Multiple styles
-  * Move Left/Right and Forward
-* Ground
-  * Nice grassy field.  Maybe animated
-  * Cave entrance
-* Obstacles
-  * Rocks and trees that change knight movement
+If you shoot a knight they become a statue, and knights will change direction when they encounter one
 
-## Gameplay
-* Very Centipede
-* knights march towards cave
-* when killed knights become <somthing>
-* Barriers force knights to change direction
-* Let's make Princesses ride by at the top of the screen for bonus points
-* And something come straight down scattering barriiers
+Princesses leave tokens on statues that cause knights to rush towards the cave
+
+Sheep come straight to you, but knights don't want to cross the sheep trails
+
+
