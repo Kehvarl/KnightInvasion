@@ -1,3 +1,5 @@
+require 'app/game.rb'
+
 def init args
   args.state.score = 0
   args.state.dragon = {shot_delay:0, v:5, x:620, y:660, w:30, h:60, path:'sprites/square/black.png'}.sprite!
@@ -10,6 +12,7 @@ def init args
   args.state.sheep_countdown = rand(200) + 200
   args.state.fireballs = []
   args.state.barriers = []
+  args.state.anim = [Entity.new({w:32, h:32, x:640, y: 360, frame_time:7})]
 end
 
 def spawn_knight args
@@ -255,4 +258,7 @@ def tick args
   handle_hits args
 
   render args
+
+  args.state.anim.map{|a| a.tick()}
+  args.outputs.primitives << args.state.anim
 end
