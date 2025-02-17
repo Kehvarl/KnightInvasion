@@ -12,7 +12,7 @@ def init args
   args.state.sheep_countdown = rand(200) + 200
   args.state.fireballs = []
   args.state.barriers = []
-  args.state.anim = [Entity.new({w:32, h:32, x:640, y: 360, frame_time:7})]
+  args.state.anim = [Entity.new({w:32, h:32, x:640, y:360,tx:32, frame_time:7})]
 end
 
 def spawn_knight args
