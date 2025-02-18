@@ -32,11 +32,33 @@ class Entity
     end
 end
 
+class MovingEntity < Entity
+    def initialize args
+        super vals
+        @min_x = vals.min_x || 0
+        @max_x = vals.max_x || 1280
+        @miy_y = vals.min_y || 0
+        @max_y = vals.max_y || 720
+        @vx = vals.vx || 0
+        @vy = vals.vy || 0
+    end
+
+    def move
+        @x += @vx
+        @y += @vy
+    end
+
+    def tick
+        super
+        move
+    end
+end
+
 class Game
     def initialize args
         @args = args
         @keys = args.inputs.keyboard
-        @player = {}
+        @player = {shot_delay:0, v:5, x:620, y:660, w:30, h:60, path:'sprites/square/black.png'}.sprite!
         @entities = []
         @projectiles = []
 
