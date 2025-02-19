@@ -10,6 +10,8 @@ def init args
   args.state.princess_countdown = rand(300) + 300
   args.state.sheep = []
   args.state.sheep_countdown = rand(200) + 200
+  args.state.gryphons = []
+  args.state.gryphon_countdown = rand(400) + 200
   args.state.fireballs = []
   args.state.barriers = []
   args.state.anim = [Entity.new({w:32, h:32, x:640, y:360,tx:32, frame_time:7})]
@@ -47,6 +49,16 @@ def spawn_sheep args
                           flip_horizontally: false,
                           path:'sprites/square/gray.png'}.sprite!
 end
+
+def spawn_gryphon args
+  gy = 180 + rand(360)
+  g = {x:0, y:gy, w:20, h:30}
+  args.state.gryphons << {remove:false, score:30, :direction => :up,
+                          v:3, x:0, y:gy, w:20, h:30,
+                          flip_horizontally: false,
+                          path:'sprites/square/yellow.png'}.sprite!
+end
+
 
 def spawn_fireball args
   f = {remove:false,
@@ -155,6 +167,22 @@ def move_sheep args
   end
 end
 
+def move_gryphon args
+  args.state.gryphons.map do |g|
+    if g.direction == :up
+      g.y += g.v
+    else
+      g.y -= g.v
+    end
+    g.x += g.v
+    if g.y >= 640
+      g.direction = :down
+    elsif g.y <= 0
+      g.direction = :up
+    end
+  end
+end
+
 def move_fireballs args
   args.state.fireballs.map do |f|
     f.y -= f.v
@@ -180,6 +208,14 @@ def handle_hits args
     args.state.score += princess.score
   end
 
+  # Did any Gryphons get hit?
+  Geometry.each_intersect_rect(args.state.fireballs, args.state.gryphons) do |fireball, gryphons|
+    gryphons.remove=true
+    fireball.remove=true
+    args.state.score += gryphons.score
+  end
+
+
     # Did any Barriers get hit?
   Geometry.each_intersect_rect(args.state.fireballs, args.state.barriers) do |fireball, barrier|
     barrier.hp -=1
@@ -187,7 +223,7 @@ def handle_hits args
     args.state.score += barrier.score
   end
 
-      # Did any Barriers get hit?
+      # Did any Sheep get hit?
   Geometry.each_intersect_rect(args.state.fireballs, args.state.sheep) do |fireball, sheep|
     sheep.remove=true
     fireball.remove=true
@@ -199,6 +235,7 @@ def handle_hits args
   args.state.knights = args.state.knights.select{|k| k.remove == false}
   args.state.princesses = args.state.princesses.select{|p| p.remove == false}
   args.state.sheep = args.state.sheep.select{|s| s.remove == false}
+  args.state.gryphons = args.state.gryphons.select{|g| g.remove == false}
 
 
   args.state.barriers = args.state.barriers.select{|b| b.hp > 0}
@@ -211,6 +248,7 @@ def render args
   args.outputs.primitives << args.state.knights
   args.outputs.primitives << args.state.princesses
   args.outputs.primitives << args.state.sheep
+  args.outputs.primitives << args.state.gryphons
   args.outputs.primitives << args.state.barriers
   args.outputs.primitives << args.state.fireballs
   args.outputs.primitives << {x:0, y:700, text: args.state.score.to_s}.label!
@@ -237,7 +275,6 @@ def tick args
     end
   end
 
-
   # Spawn Knights when required
   if args.state.knights_to_spawn > 0
     if spawn_knight args
@@ -250,10 +287,17 @@ def tick args
     args.state.knights_to_spawn = rand(5) + 5
   end
 
+  args.state.gryphon_countdown -= 1
+  if args.state.gryphon_countdown <= 0
+    args.state.gryphon_countdown = 400 + rand(250)
+    spawn_gryphon args
+  end
+
   handle_input args
   move_knights args
   move_princesses args
   move_sheep args
+  move_gryphon args
   move_fireballs args
   handle_hits args
 
