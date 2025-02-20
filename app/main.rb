@@ -259,6 +259,13 @@ def tick args
     init args
   end
 
+  #TODO: Move all of this to methods so TICK is a little cleaner
+  #TODO: Clean up this whole file.
+  #TODO: When an enemy contacts the dragon, lose a life
+  #TODO: When a Knight reaches the Cave, lose some treasure.  Or a Princess if some are captured
+  #TODO: Some way to "capture" a princess
+  #TODO: Actual Graphics
+
   args.state.dragon.shot_delay -= 1
 
   args.state.princess_countdown -= 1
