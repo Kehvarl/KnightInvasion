@@ -241,34 +241,8 @@ def handle_hits args
   args.state.barriers = args.state.barriers.select{|b| b.hp > 0}
 end
 
-def render args
-    # Render
-  args.outputs.primitives << {x:0, y:0, w:1280, h:720, r:0, g:96, b:32}.solid!
-  args.outputs.primitives << args.state.dragon
-  args.outputs.primitives << args.state.knights
-  args.outputs.primitives << args.state.princesses
-  args.outputs.primitives << args.state.sheep
-  args.outputs.primitives << args.state.gryphons
-  args.outputs.primitives << args.state.barriers
-  args.outputs.primitives << args.state.fireballs
-  args.outputs.primitives << {x:0, y:700, text: args.state.score.to_s}.label!
-end
-
-def tick args
-  if args.tick_count == 0
-    init args
-  end
-
-  #TODO: Move all of this to methods so TICK is a little cleaner
-  #TODO: Clean up this whole file.
-  #TODO: When an enemy contacts the dragon, lose a life
-  #TODO: When a Knight reaches the Cave, lose some treasure.  Or a Princess if some are captured
-  #TODO: Some way to "capture" a princess
-  #TODO: Actual Graphics
-
-  args.state.dragon.shot_delay -= 1
-
-  args.state.princess_countdown -= 1
+def spawn_things
+    args.state.princess_countdown -= 1
   if args.state.princess_countdown <= 0 and rand(1000) < 10
     spawn_princess args
     args.state.princess_countdown = 300 + rand(600)
@@ -299,6 +273,37 @@ def tick args
     args.state.gryphon_countdown = 400 + rand(250)
     spawn_gryphon args
   end
+end
+
+def render args
+    # Render
+  args.outputs.primitives << {x:0, y:0, w:1280, h:720, r:0, g:96, b:32}.solid!
+  args.outputs.primitives << args.state.dragon
+  args.outputs.primitives << args.state.knights
+  args.outputs.primitives << args.state.princesses
+  args.outputs.primitives << args.state.sheep
+  args.outputs.primitives << args.state.gryphons
+  args.outputs.primitives << args.state.barriers
+  args.outputs.primitives << args.state.fireballs
+  args.outputs.primitives << {x:0, y:700, text: args.state.score.to_s}.label!
+end
+
+def tick args
+  if args.tick_count == 0
+    init args
+  end
+
+  #DONE: Move all of this to methods so TICK is a little cleaner
+  #TODO: Clean up this whole file.
+  #TODO: When an enemy contacts the dragon, lose a life
+  #TODO: When a Knight reaches the Cave, lose some treasure.  Or a Princess if some are captured
+  #TODO: Some way to "capture" a princess
+  #TODO: Actual Graphics
+
+  args.state.dragon.shot_delay -= 1
+
+  spawn_things args
+
 
   handle_input args
   move_knights args
