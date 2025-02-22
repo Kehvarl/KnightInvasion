@@ -58,10 +58,21 @@ class Game
     def initialize args
         @args = args
         @keys = args.inputs.keyboard
+        @score = 0
+        @max_score = 0
         @player = {shot_delay:0, v:5, x:620, y:660, w:30, h:60, path:'sprites/square/black.png'}.sprite!
         @entities = []
         @projectiles = []
 
+    end
+
+    def check_overlap x, y, w, h
+        @entities.any_intersect_rect?({x:x, y:y, w:w, h:h})
+    end
+
+    def create_entity type, hits, vx, vy, score, favor, x, y, w, h, path
+        {type:type, hits:hits, remove:false, vx:vx, vy:vy, score:score, favor:favor,
+         x:x, y:y, w:wm h:h, flip_horizontally:false, path:path}.sprite!
     end
 
     def handle_input
@@ -86,6 +97,42 @@ class Game
             if @player.shot_delay <= 0
             #spawn_fireball args
             @player.shot_delay = 15
+            end
+        end
+    end
+
+    def move_entities
+        @entites.map do |e|
+            # If encountered favor, head to top as fast as possible, then resume normal movement
+            if e.favor
+                e.y += [e.vx, e.vy].max
+                if e.y + e.h >= 700
+                    e.favor = false
+                end
+            else
+                e.x += e.vx
+                e.y += e.vy
+                if e.x + k.w >= 1280 or e.x <= 0 or @barriers.any_intersect_rect?(e)
+                    # How to cleanly handle each entity type's barrier interactions?
+                    Geometry.each_intersect_rect(@barriers, args.state.knights) do |barrier, knight|
+                    if barrier.arrow
+                        knight.arrow = true
+                        return
+                    end
+                    end
+                    k.v = -k.v
+                    if k.direction == :up
+                        k.y += (k.h + 10)
+                    else
+                        k.y -= (k.h + 10)
+                    end
+                    if k.y <= 0
+                        k.direction = :up
+                    elsif k.y >= 630
+                        k.direction = :down
+                    end
+                    k.flip_horizontally = !k.flip_horizontally
+                end
             end
         end
     end
