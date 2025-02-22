@@ -2,6 +2,8 @@ require 'app/game.rb'
 
 def init args
   args.state.score = 0
+  args.state.max_score = 0
+  args.state.live = 3
   args.state.dragon = {shot_delay:0, v:5, x:620, y:660, w:30, h:60, path:'sprites/square/black.png'}.sprite!
   args.state.knights = []
   args.state.knights_to_spawn = 10
