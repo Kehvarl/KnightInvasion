@@ -28,7 +28,6 @@ class Entity
     end
 
     def tick
-        animate
     end
 end
 
@@ -44,8 +43,39 @@ class MovingEntity < Entity
     end
 
     def move
-        @x += @vx
-        @y += @vy
+        if e.favor
+            e.y += [e.vx, e.vy].max
+            if e.y + e.h >= 700
+                e.favor = false
+            end
+        else
+            @x += @vx
+            @y += @vy
+            if @x + @w >= 1280 or @x <= 0 or @barriers.any_intersect_rect?(e)
+
+                # How to cleanly handle each entity type's barrier interactions?
+                Geometry.each_intersect_rect(@barriers, args.state.knights) do |barrier, knight|
+                    if barrier.arrow
+                        knight.arrow = true
+                        return
+                    end
+                end
+                @vx = -@vx
+                @vy = -@vy
+                if @direction == :up
+                    @y += (k.h + 10)
+                else
+                    @y -= (k.h + 10)
+                end
+                if @y <= 0
+                    @direction = :up
+                elsif k.y >= 630
+                    @direction = :down
+                end
+                @flip_horizontally = @flip_horizontally
+            end
+        end
+
     end
 
     def tick

@@ -1,5 +1,3 @@
-require 'app/game.rb'
-
 def init args
   args.state.score = 0
   args.state.max_score = 0
@@ -16,7 +14,6 @@ def init args
   args.state.gryphon_countdown = rand(400) + 200
   args.state.fireballs = []
   args.state.barriers = []
-  args.state.anim = [Entity.new({w:32, h:32, x:640, y:360,tx:32, frame_time:7})]
 end
 
 def spawn_knight args
@@ -243,7 +240,7 @@ def handle_hits args
   args.state.barriers = args.state.barriers.select{|b| b.hp > 0}
 end
 
-def spawn_things
+def spawn_things args
     args.state.princess_countdown -= 1
   if args.state.princess_countdown <= 0 and rand(1000) < 10
     spawn_princess args
@@ -295,7 +292,6 @@ def tick args
     init args
   end
 
-  #DONE: Move all of this to methods so TICK is a little cleaner
   #TODO: Clean up this whole file.
   #TODO: When an enemy contacts the dragon, lose a life
   #TODO: When a Knight reaches the Cave, lose some treasure.  Or a Princess if some are captured
@@ -317,6 +313,5 @@ def tick args
 
   render args
 
-  args.state.anim.map{|a| a.tick()}
   args.outputs.primitives << args.state.anim
 end
