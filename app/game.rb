@@ -2,6 +2,8 @@ class Entity
     attr_sprite
     def initialize vals
         super()
+        @remove = false
+
         @x = vals.x || 0
         @y = vals.y || 0
         @w = vals.w || 20
@@ -40,42 +42,52 @@ class MovingEntity < Entity
         @max_y = vals.max_y || 720
         @vx = vals.vx || 0
         @vy = vals.vy || 0
+
+        @has_favor = false
+        @direction = :up
+        @reverse_on_collision = false
     end
 
     def move
-        if e.favor
-            e.y += [e.vx, e.vy].max
-            if e.y + e.h >= 700
-                e.favor = false
+
+        if @type == :gryphon and (@y >= 640 or @y <= 0)
+            @vy = -@vy
+        end
+
+        if @favor
+            @y += [@vx, @vy].max
+            if @y + @h >= 700
+                @favor = false
             end
         else
             @x += @vx
             @y += @vy
-            if @x + @w >= 1280 or @x <= 0 or @barriers.any_intersect_rect?(e)
 
-                # How to cleanly handle each entity type's barrier interactions?
-                Geometry.each_intersect_rect(@barriers, args.state.knights) do |barrier, knight|
-                    if barrier.arrow
-                        knight.arrow = true
-                        return
-                    end
-                end
-                @vx = -@vx
-                @vy = -@vy
-                if @direction == :up
-                    @y += (k.h + 10)
+            if @x + @w >= 1280 or @x <= 0 # Touched edge of screen
+                if  @reverse_on_collision
+                    reverse_and_shift_row
                 else
-                    @y -= (k.h + 10)
+                    @remove = true
                 end
-                if @y <= 0
-                    @direction = :up
-                elsif k.y >= 630
-                    @direction = :down
-                end
-                @flip_horizontally = @flip_horizontally
             end
         end
+    end
 
+
+    def reverse_and_shift_row
+        @vx = -@vx
+        @vy = -@vy
+        if @direction == :up
+            @y += (@h + 10)
+        else
+            @y -= (@h + 10)
+        end
+        if @y <= 0
+            @direction = :up
+        elsif @y >= 630
+            @direction = :down
+        end
+        @flip_horizontally =  !@flip_horizontally
     end
 
     def tick
@@ -98,11 +110,6 @@ class Game
 
     def check_overlap x, y, w, h
         @entities.any_intersect_rect?({x:x, y:y, w:w, h:h})
-    end
-
-    def create_entity type, hits, vx, vy, score, favor, x, y, w, h, path
-        {type:type, hits:hits, remove:false, vx:vx, vy:vy, score:score, favor:favor,
-         x:x, y:y, w:wm h:h, flip_horizontally:false, path:path}.sprite!
     end
 
     def handle_input
@@ -131,47 +138,12 @@ class Game
         end
     end
 
-    def move_entities
-        @entites.map do |e|
-            # If encountered favor, head to top as fast as possible, then resume normal movement
-            if e.favor
-                e.y += [e.vx, e.vy].max
-                if e.y + e.h >= 700
-                    e.favor = false
-                end
-            else
-                e.x += e.vx
-                e.y += e.vy
-                if e.x + k.w >= 1280 or e.x <= 0 or @barriers.any_intersect_rect?(e)
-                    # How to cleanly handle each entity type's barrier interactions?
-                    Geometry.each_intersect_rect(@barriers, args.state.knights) do |barrier, knight|
-                    if barrier.arrow
-                        knight.arrow = true
-                        return
-                    end
-                    end
-                    k.v = -k.v
-                    if k.direction == :up
-                        k.y += (k.h + 10)
-                    else
-                        k.y -= (k.h + 10)
-                    end
-                    if k.y <= 0
-                        k.direction = :up
-                    elsif k.y >= 630
-                        k.direction = :down
-                    end
-                    k.flip_horizontally = !k.flip_horizontally
-                end
-            end
-        end
-    end
-
     def tick
         handle_input
 
         @entities.map{|e| e.tick}
         @projectiles.map{|e| e.tick}
+        @entites = @entities.select{|e| e.remove == false}
     end
 
     def render
