@@ -96,13 +96,52 @@ class MovingEntity < Entity
     end
 end
 
+class Player < Entity
+    def initialize vals
+        super(vals)
+        @shot_delay = vals.shot_delay || 0
+        @v = vals.v || 5
+    end
+
+
+    def handle_input keys
+        if keys.left
+            # Fly Left
+            @x = [0, @x - @v].max
+        elsif keys.right
+            # Fly Right
+            @x = [1280 - @w, @x + @v].min
+        end
+
+        if keys.up
+            # Move away from the cave
+            @y = [720 - @h, @y + @v].min
+        elsif keys.down
+            # Move closer to the cave
+            @y = [600 - @h, @y - @v].max
+        end
+
+        if keys.space
+            #Breathe fire
+            if @shot_delay <= 0
+                #spawn_fireball args
+                @shot_delay = 15
+            end
+        end
+    end
+
+    def tick keys
+        super()
+        handle_input keys
+    end
+end
+
 class Game
     def initialize args
         @args = args
-        @keys = args.inputs.keyboard
         @score = 0
         @max_score = 0
-        @player = {shot_delay:0, v:5, x:620, y:660, w:30, h:60, path:'sprites/square/black.png'}.sprite!
+        @player = Player.new({shot_delay:0, v:5, x:620, y:660, w:30, h:60, tw:80, th:80, path:'sprites/square/black.png'})
         @entities = []
         @projectiles = []
 
@@ -112,34 +151,8 @@ class Game
         @entities.any_intersect_rect?({x:x, y:y, w:w, h:h})
     end
 
-    def handle_input
-        if @keys.left
-            # Fly Left
-            @player.x = [0, @player.x - @player.v].max
-        elsif @keys.right
-            # Fly Right
-            @player.x = [1280 - @player.w, @player.x + @player.v].min
-        end
-
-        if @keys.up
-            # Move away from the cave
-            @player.y = [720 - @player.h, @player.y + @player.v].min
-        elsif @keys.down
-            # Move closer to the cave
-            @player.y = [600 - @player.h, @player.y - @player.v].max
-        end
-
-        if @keys.space
-            #Breathe fire
-            if @player.shot_delay <= 0
-            #spawn_fireball args
-            @player.shot_delay = 15
-            end
-        end
-    end
-
     def tick
-        handle_input
+        @player.tick(@args.inputs.keyboard)
 
         @entities.map{|e| e.tick}
         @projectiles.map{|e| e.tick}
