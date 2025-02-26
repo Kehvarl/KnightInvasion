@@ -1,3 +1,4 @@
+require 'app/entities.rb'
 require 'app/game.rb'
 
 def init args
