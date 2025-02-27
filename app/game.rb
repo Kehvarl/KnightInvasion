@@ -8,6 +8,7 @@ class Game
         @entities = []
         @projectiles = []
         @knights_to_spawn = 10
+        @princess_countdown = rand(300) + 300
     end
 
     def spawn_knights
@@ -26,14 +27,30 @@ class Game
         end
     end
 
+    def spawn_princess
+        @princess_countdown -= 1
+        if @princess_countdown <= 0 and rand(1000) < 10
+            py =  rand(400)
+            p = {x:0, y:py, w:20, h:30}
+            if not @entities.any_intersect_rect?(p)
+                @entities << MovingEntity.new({remove:false, score:20, vx:6,
+                                               tw:80, th:80,x:0, y:py, w:20, h:30,
+                                               flip_horizontally: false,
+                                               path:'sprites/square/violet.png'})
+                @princess_countdown = 300 + rand(600)
+            end
+        end
+    end
+
     def tick
         @player.tick(@args.inputs.keyboard)
 
         spawn_knights
+        spawn_princess
 
         @entities.map{|e| e.tick}
         @projectiles.map{|e| e.tick}
-        @entites = @entities.select{|e| e.remove == false}
+        @entities = @entities.select{|e| e.remove == false}
     end
 
     def render
