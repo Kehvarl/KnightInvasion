@@ -1,8 +1,9 @@
 class Entity
     attr_sprite
-    attr_accessor :frames, :frame_time, :cur_frame, :cur_frame_time, :remove
+    attr_accessor :type, :frames, :frame_time, :cur_frame, :cur_frame_time, :remove
     def initialize vals
         super()
+        @type = vals.type || :unknown
         @remove = false
 
         @x = vals.x || 0
