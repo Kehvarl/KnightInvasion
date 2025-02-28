@@ -9,6 +9,8 @@ class Game
         @projectiles = []
         @knights_to_spawn = 10
         @princess_countdown = rand(300) + 300
+        @gryphon_countdown = 400 + rand(250)
+
     end
 
     def spawn_knights
@@ -16,12 +18,12 @@ class Game
         if @knights_to_spawn > 0
             k = {x:0, y:40, w:60, h:40}
             if not @entities.any_intersect_rect?(k)
-                @entities << MovingEntity.new({remove:false, arrow:false,
-                                            :direction => :up, score:10,
-                                            reverse_on_collision:true, vx:5,
-                                            tw:80, th:80, x:0, y:40, w:30, h:40,
-                                            flip_horizontally: false,
-                                            path:'sprites/square/red.png'})
+                @entities << MovingEntity.new({:type => :knight, remove:false, arrow:false,
+                                               :direction => :up, score:10,
+                                               reverse_on_collision:true, vx:5,
+                                               tw:80, th:80, x:0, y:40, w:30, h:40,
+                                               flip_horizontally: false,
+                                               path:'sprites/square/red.png'})
                 @knights_to_spawn -= 1
             end
         end
@@ -33,11 +35,28 @@ class Game
             py =  rand(400)
             p = {x:0, y:py, w:20, h:30}
             if not @entities.any_intersect_rect?(p)
-                @entities << MovingEntity.new({remove:false, score:20, vx:6,
-                                               tw:80, th:80,x:0, y:py, w:20, h:30,
+                @entities << MovingEntity.new({:type => :princess, remove:false, score:20, vx:6,
+                                               tw:80, th:80, x:0, y:py, w:20, h:30,
                                                flip_horizontally: false,
                                                path:'sprites/square/violet.png'})
                 @princess_countdown = 300 + rand(600)
+            end
+        end
+    end
+
+    def spawn_gryphon
+        @gryphon_countdown -= 1
+
+        gy = 180 + rand(360)
+        g = {x:0, y:gy, w:20, h:30}
+        if @gryphon_countdown <= 0
+            if not @entities.any_intersect_rect?(g)
+                @entities << MovingEntity.new({:type => :gryphon, remove:false, score:30,
+                                            :direction => :up,
+                                            tw:80, th:80, vx:3, vy:3, x:0, y:gy, w:20, h:30,
+                                            flip_horizontally: false,
+                                            path:'sprites/square/yellow.png'})
+                @gryphon_countdown = 400 + rand(250)
             end
         end
     end
@@ -47,6 +66,7 @@ class Game
 
         spawn_knights
         spawn_princess
+        spawn_gryphon
 
         @entities.map{|e| e.tick}
         @projectiles.map{|e| e.tick}
