@@ -8,8 +8,9 @@ class Game
         @entities = []
         @projectiles = []
         @knights_to_spawn = 10
-        @princess_countdown = rand(300) + 300
+        @princess_countdown = 300 + rand(300)
         @gryphon_countdown = 400 + rand(250)
+        @sheep_countdown = 200 + rand(250)
 
     end
 
@@ -44,6 +45,21 @@ class Game
         end
     end
 
+    def spawn_sheep
+        if @entities.select{|e| e.type==:sheep}.size == 0
+            @sheep_countdown -= 1
+            if @sheep_countdown <= 0
+                  sx = rand(1250)
+                  s = {x:sx, y:0, w:20, h:30}
+                  @entities << MovingEntity.new({:type => :sheep, remove:false, score:30, vx:0, vy:3,
+                                                 tw:80, th:80, x:sx, y:0, w:20, h:30,
+                                                 flip_horizontally: false,
+                                                 path:'sprites/square/gray.png'})
+                @sheep_countdown = rand(500) + 300
+            end
+        end
+    end
+
     def spawn_gryphon
         @gryphon_countdown -= 1
 
@@ -67,6 +83,7 @@ class Game
         spawn_knights
         spawn_princess
         spawn_gryphon
+        spawn_sheep
 
         @entities.map{|e| e.tick}
         @projectiles.map{|e| e.tick}
